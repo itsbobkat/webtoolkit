@@ -1,0 +1,14 @@
+{% extends 'core/include/base.html' %}
+{% block body %}
+url shortener<br>
+{% if shortened_url %}
+<h3>Success! The short URL is <a href="{{ shortened_url }}">{{ shortened_url}}</a></h3>
+{% endif %}
+<form action="{% url "core:url_shortener" %}" method="POST">
+    {% csrf_token %}
+    <textarea name="url" type="text" id="shorten-input"></textarea>
+    <button type="submit">Shorten!</button>
+</form>
+{% endblock body %}
+{% block after_body %}
+{% endblock after_body %}
