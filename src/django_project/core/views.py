@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
@@ -34,7 +34,7 @@ class URLShortenerView(View):
 
 def url_shortener_redirect(request, alias):
     if (request.method or "").lower() != "get":
-        return HttpResponseBadRequest()
+        return HttpResponseNotFound()
     obj = get_object_or_404(
         models.ShortenedURL,
         alias=alias,
