@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -26,17 +29,52 @@ class ShortenedURL(models.Model):
     @classmethod
     def create(cls, url: str, owner: User | None = None):
         return cls.objects.create(
-            alias=cls.get_alias(),
+            alias=get_alias(cls),
             url=url,
             owner=owner,
         )
 
+
+def uploaded_filename(_instance, filename):
+    return "/".join(["uploaded_files", uuid.uuid4().hex, filename])
+
+
+class UploadedFile(models.Model):
+    alias = models.TextField()
+    ext = models.TextField(
+        null=True,
+        blank=True,
+    )
+    file = models.FileField(upload_to=uploaded_filename)
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    inserted_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
     @classmethod
-    def get_alias(cls) -> str:
-        current_length = 3
-        while cls.objects.count() / (len(available_chars) ** current_length) >= 0.3:
-            current_length += 1
+    def create(cls, file, owner):
+        _, ext = os.path.splitext(file.name)
+        return cls.objects.create(
+            alias=get_alias(cls),
+            ext=ext,
+            file=file,
+            owner=owner,
+        )
+
+
+def get_alias(model: type[UploadedFile] | type[ShortenedURL]) -> str:
+    current_length = 3
+    while model.objects.count() / (len(available_chars) ** current_length) >= 0.3:
+        current_length += 1
+    alias = generate_alias(current_length)
+    while model.objects.filter(alias=alias).exists():
         alias = generate_alias(current_length)
-        while cls.objects.filter(alias=alias).exists():
-            alias = generate_alias(current_length)
-        return alias
+    return alias
