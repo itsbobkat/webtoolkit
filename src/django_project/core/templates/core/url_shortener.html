@@ -1,5 +1,13 @@
 {% extends 'core/include/base.html' %}
 {% block body %}
+{% if errors %}
+<h3>Errors:<h3>
+{% for e in errors %}
+    <p> {{ e }} </p>
+{% endfor %}
+<hr>
+{% endif %}
+
 url shortener<br>
 {% if shortened_url %}
 <h3>Success! The short URL is <a href="{{ shortened_url }}">{{ shortened_url}}</a></h3>

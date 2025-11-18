@@ -1,0 +1,22 @@
+{% extends 'core/include/base.html' %}
+{% block body %}
+{% if errors %}
+<h3>Errors:<h3>
+{% for e in errors %}
+    <p> {{ e }} </p>
+{% endfor %}
+<hr>
+{% endif %}
+
+File Hosting<br>
+{% if file_url %}
+<h3>Success! The uploaded file is <a href="{{ file_url }}">{{ file_url}}</a></h3>
+{% endif %}
+<form action="{% url "core:file_hosting" %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input name="file" type="file" id="file-input"> (Max Size: {{ file_hosting_max_size_mb }} MB )
+    <button type="submit">Upload!</button>
+</form>
+{% endblock body %}
+{% block after_body %}
+{% endblock after_body %}
