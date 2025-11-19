@@ -34,6 +34,9 @@ class ShortenedURL(models.Model):
             owner=owner,
         )
 
+    def url_display(self) -> str:
+        return self.url[:100]
+
 
 def uploaded_filename(_instance, filename):
     return "/".join(["uploaded_files", uuid.uuid4().hex, filename])
@@ -68,6 +71,15 @@ class UploadedFile(models.Model):
             file=file,
             owner=owner,
         )
+
+    def alias_filename(self):
+        return self.alias + self.ext
+
+    def filename(self):
+        return os.path.basename(self.file.url)
+
+    def file_size_mb(self):
+        return round(self.file.size / 1024 / 1024, 4)
 
 
 def get_alias(model: type[UploadedFile] | type[ShortenedURL], start_length=3) -> str:

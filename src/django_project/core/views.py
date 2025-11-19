@@ -3,6 +3,7 @@ import typing as t
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,6 +12,7 @@ from django.views import View
 
 from . import models
 from .utils import url_shortener as url_shortener_utils
+from .utils.common import get_paginated_items
 
 User = get_user_model()
 
@@ -50,31 +52,47 @@ class RegisterView(View):
 
 
 class URLShortenerView(LoginRequiredMixin, View):
+    def get_page(
+        self,
+    ):
+        try:
+            page = int(self.request.GET.get("page", 1))
+        except:
+            page = None
+        return get_paginated_items(
+            models.ShortenedURL.objects.filter(owner=self.request.user).order_by(
+                "-inserted_at"
+            ),
+            page,
+        )
+
     def get(self, request: HttpRequest):
         return render(
             request,
             "core/url_shortener.html",
-            get_common_context(),
+            get_common_context() | {"page": self.get_page()},
         )
 
     def post(self, request: HttpRequest):
         errors: list[str] = []
+        common_context = get_common_context() | {"page": self.get_page()}
         url = request.POST.get("url")
         if not url or not url_shortener_utils.is_http_url(url):
             errors.append("Invalid URL")
             return render(
                 request,
                 "core/url_shortener.html",
-                get_common_context() | {"errors": errors},
+                common_context | {"errors": errors},
             )
 
         created = models.ShortenedURL.create(
             url,
             request.user,
         )
+        common_context["page"] = self.get_page()
         shortened_url = request.build_absolute_uri(
             reverse(
-                "core:url_shortener_redirect",
+                "core:url_shortener_url",
                 kwargs={
                     "alias": created.alias,
                 },
@@ -84,31 +102,59 @@ class URLShortenerView(LoginRequiredMixin, View):
         return render(
             request,
             "core/url_shortener.html",
-            get_common_context() | {"shortened_url": shortened_url},
+            common_context | {"shortened_url": shortened_url},
         )
 
 
-def url_shortener_redirect(request, alias):
-    if (request.method or "").lower() != "get":
-        return HttpResponseNotFound()
+class URLShortenerURLView(View):
+    def get(self, request, alias, *args, **kwargs):
+        obj = get_object_or_404(
+            models.ShortenedURL,
+            alias=alias,
+        )
+        return redirect(obj.url)
+
+
+@login_required
+def url_shortener_url_delete(request, alias):
+    try:
+        page = int(request.GET.get("page", 1))
+    except:
+        page = 1
     obj = get_object_or_404(
         models.ShortenedURL,
         alias=alias,
+        owner=request.user,
     )
-    return redirect(obj.url)
+    obj.delete()
+    return redirect(reverse("core:url_shortener") + f"?page={page}")
 
 
 class FileHostingView(LoginRequiredMixin, View):
+    def get_page(
+        self,
+    ):
+        try:
+            page = int(self.request.GET.get("page", 1))
+        except:
+            page = None
+        return get_paginated_items(
+            models.UploadedFile.objects.filter(owner=self.request.user).order_by(
+                "-inserted_at"
+            ),
+            page,
+        )
+
     def get(self, request):
         return render(
             request,
             "core/file_hosting.html",
-            get_common_context(),
+            get_common_context() | {"page": self.get_page()},
         )
 
     def post(self, request: HttpRequest):
         errors = []
-        common_context = get_common_context()
+        common_context = get_common_context() | {"page": self.get_page()}
         try:
             content_length = int(request.META.get("CONTENT_LENGTH"))
         except:
@@ -116,24 +162,22 @@ class FileHostingView(LoginRequiredMixin, View):
             return render(
                 request,
                 "core/file_hosting.html",
-                get_common_context() | {"errors": errors},
+                common_context | {"errors": errors},
             )
         if "file" not in request.FILES:
             errors.append("Bad Request!")
             return render(
                 request,
                 "core/file_hosting.html",
-                get_common_context() | {"errors": errors},
+                common_context | {"errors": errors},
             )
-
-
 
         if content_length > common_context["file_hosting_max_size"]:
             errors.append(f"File too large (size: {content_length / 1024 / 1024} MB)")
             return render(
                 request,
                 "core/file_hosting.html",
-                get_common_context() | {"errors": errors},
+                common_context | {"errors": errors},
             )
         created = models.UploadedFile.create(request.FILES["file"], request.user)
         file_url = request.build_absolute_uri(
@@ -146,7 +190,7 @@ class FileHostingView(LoginRequiredMixin, View):
         return render(
             request,
             "core/file_hosting.html",
-            get_common_context()
+            common_context
             | {
                 "errors": errors,
                 "file_url": file_url,
@@ -163,3 +207,20 @@ def file_redirect(request: HttpRequest, alias_filename: str):
     )
 
     return redirect(request.build_absolute_uri(file_obj.file.url))
+
+
+@login_required
+def file_delete(request: HttpRequest, alias_filename: str):
+    try:
+        page = int(request.GET.get("page", 1))
+    except:
+        page = 1
+    alias, ext = os.path.splitext(alias_filename)
+    file_obj = get_object_or_404(
+        models.UploadedFile,
+        alias=alias,
+        ext=ext,
+    )
+    file_obj.delete()
+
+    return redirect(reverse("core:file_hosting") + f"?page={page}")
