@@ -17,6 +17,28 @@ url shortener<br>
     <textarea name="url" type="text" id="shorten-input"></textarea>
     <button type="submit">Shorten!</button>
 </form>
+<hr>
+{% if page %}
+
+<h3>Shortened URLs</h3>
+{% for item in page.object_list %}
+<p><a class="link" href="{% url "core:url_shortener_url" item.alias %}">{{ item.url_display }}</a> &nbsp;&nbsp;
+
+<a class="link" href="{% url "core:url_shortener_url_delete" item.alias %}?page={{ page.number }}">Delete</button>
+
+</p>
+<hr>
+
+{% endfor %}
+<br>
+{% if page.has_next %}
+<a class="link" href="{% url "core:url_shortener" %}?page={{page.next_page_number}}">Next Page</a>
+{% endif %}
+{% if page.has_previous %}
+<a class="link" href="{% url "core:url_shortener" %}?page={{page.previous_page_number}}"> Previous Page</a>
+{% endif %}
+
+{% endif %}
 {% endblock body %}
 {% block after_body %}
-{% endblock after_body %}
+{% endblock %}

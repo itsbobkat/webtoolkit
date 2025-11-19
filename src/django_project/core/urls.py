@@ -21,13 +21,23 @@ urlpatterns = [
     ),
     path(
         f"s/<slug:alias>",
-        views.url_shortener_redirect,
-        name="url_shortener_redirect",
+        views.URLShortenerURLView.as_view(),
+        name="url_shortener_url",
+    ),
+    path(
+        f"s/<slug:alias>/delete/",
+        views.url_shortener_url_delete,
+        name="url_shortener_url_delete",
     ),
     path(
         f"f/<str:alias_filename>",
         views.file_redirect,
         name="file_redirect",
+    ),
+    path(
+        f"f/<str:alias_filename>/delete/",
+        views.file_delete,
+        name="file_delete",
     ),
     path(
         f"register/",
