@@ -13,20 +13,36 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from colorama import Back, Fore, Style
+from environs import env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+env.read_env()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+
+DEBUG = env.bool("DEBUG", False)
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-tuo+w@h1*wy+qgwu-bgj^szy%p64a9zguo536mbj)ie_sh&)q0"
+if DEBUG:
+    SECRET_KEY = "django-insecure-tuo+w@h1*wy+qgwu-bgj^szy%p64a9zguo536mbj)ie_sh&)q0"
+
+    ALLOWED_HOSTS = []
+else:
+    SECRET_KEY = env("SECRET_KEY")
+    if not SECRET_KEY:
+        print(Fore.RED + Back.WHITE + "pls set SECRET_KEY in your .env before starting")
+        print(Style.RESET_ALL)
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+    if not ALLOWED_HOSTS:
+        print(
+            Fore.RED + Back.WHITE + "pls set ALLOWED_HOSTS in your .env before starting"
+        )
+        print(Style.RESET_ALL)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -44,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -136,3 +153,11 @@ FILE_HOSTING_MAX_SIZE = 512 * MB
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+STATIC_ROOT = BASE_DIR / "static_root"
