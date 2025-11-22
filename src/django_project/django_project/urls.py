@@ -38,11 +38,13 @@ root_urlpatterns = [
 
 # base url path without starting or trilling slashes
 base_url_path = getattr(settings, "BASE_URL_PATH", "")
-base_url_path = base_url_path + "/" if base_url_path else base_url_path
+if base_url_path:
+    base_url_path += "/"
 urlpatterns = [
-    path(base_url_path, include(root_urlpatterns),
+    path(
+        base_url_path,
+        include(root_urlpatterns),
     )
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

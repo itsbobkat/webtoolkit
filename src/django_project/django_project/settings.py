@@ -55,7 +55,6 @@ MEDIA_SUFFIX = "/media/"
 MEDIA_URL = "/".join([BASE_URL_PATH, MEDIA_SUFFIX]).replace("//", "/")
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -153,7 +152,7 @@ SHELL_PLUS = "ipython"
 
 LOGOUT_REDIRECT_URL = "core:home"
 LOGIN_REDIRECT_URL = "core:home"
-LOGIN_URL = "login" # resolve "login" instead of using hardcoded "/accounts/login/"
+LOGIN_URL = "login"  # resolve "login" instead of using hardcoded "/accounts/login/"
 
 ENABLE_REGISTRATION = False
 MB = 1024 * 1024
