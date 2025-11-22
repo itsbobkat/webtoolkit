@@ -44,6 +44,17 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
+# base url path without starting or trilling slash
+BASE_URL_PATH = env.str("BASE_URL_PATH", "/").strip("/")
+
+STATIC_SUFFIX = "static/"
+STATIC_URL = "/".join([BASE_URL_PATH, STATIC_SUFFIX]).replace("//", "/")
+
+MEDIA_SUFFIX = "/media/"
+
+MEDIA_URL = "/".join([BASE_URL_PATH, MEDIA_SUFFIX]).replace("//", "/")
+
+
 
 # Application definition
 
@@ -133,9 +144,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -145,6 +153,7 @@ SHELL_PLUS = "ipython"
 
 LOGOUT_REDIRECT_URL = "core:home"
 LOGIN_REDIRECT_URL = "core:home"
+LOGIN_URL = "login" # resolve "login" instead of using hardcoded "/accounts/login/"
 
 ENABLE_REGISTRATION = False
 MB = 1024 * 1024
@@ -152,9 +161,11 @@ MB = 1024 * 1024
 FILE_HOSTING_MAX_SIZE = 512 * MB
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = "/media/"
 
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },

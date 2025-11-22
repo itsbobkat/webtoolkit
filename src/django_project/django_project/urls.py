@@ -21,7 +21,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-urlpatterns = [
+root_urlpatterns = [
     path("", include("core.urls")),
     path("admin/", admin.site.urls),
     path(
@@ -36,5 +36,13 @@ urlpatterns = [
     ),
 ]
 
+# base url path without starting or trilling slashes
+base_url_path = getattr(settings, "BASE_URL_PATH", "")
+base_url_path = base_url_path + "/" if base_url_path else base_url_path
+urlpatterns = [
+    path(base_url_path, include(root_urlpatterns),
+    )
+]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
