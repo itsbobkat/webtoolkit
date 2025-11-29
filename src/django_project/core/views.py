@@ -40,19 +40,11 @@ def home(request):
         "latest_files": get_latest_uploaded_files(),
     }
 
-    if request.htmx.boosted:
-        return render(
-            request,
-            "core/htmx_boosted/home.html",
-            context,
-        )
-
-    else:
-        return render(
-            request,
-            "core/home.html",
-            context,
-        )
+    return render(
+        request,
+        "core/home.html",
+        context,
+    )
 
 
 class LoginView(DjangoLoginView):
@@ -63,9 +55,6 @@ class LoginView(DjangoLoginView):
     @t.override
     def get_template_names(self) -> list[str]:
         template_names = super().get_template_names()
-
-        if self.request.htmx.boosted:
-            template_names = ["core/htmx_boosted/login.html"] + template_names
 
         return template_names
 
