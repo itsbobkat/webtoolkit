@@ -29,7 +29,7 @@ DEBUG = env.bool("DEBUG", False)
 if DEBUG:
     SECRET_KEY = "django-insecure-tuo+w@h1*wy+qgwu-bgj^szy%p64a9zguo536mbj)ie_sh&)q0"
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 else:
     SECRET_KEY = env("SECRET_KEY")
     if not SECRET_KEY:
