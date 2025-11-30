@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.http import HttpRequest, HttpResponseNotFound
+from django.http import HttpRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
@@ -62,12 +62,12 @@ class LoginView(DjangoLoginView):
 class RegisterView(View):
     def get(self, request: HttpRequest):
         if not getattr(settings, "ENABLE_REGISTRATION", False):
-            return HttpResponseNotFound()
+            raise Http404("Registration is disabled.")
         return render(request, "core/register.html", get_common_context())
 
     def post(self, request: HttpRequest):
         if not getattr(settings, "ENABLE_REGISTRATION", False):
-            return HttpResponseNotFound()
+            raise Http404("Registration is disabled.")
 
         username = request.POST.get("username")
         password = request.POST.get("password")
