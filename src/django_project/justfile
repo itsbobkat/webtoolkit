@@ -1,6 +1,8 @@
-# Runs production server. Remember to `uv run manage.py collectstatic` before running this script
+# Runs production server. Remember to run `just static` before running this script
 prod:
 	uv run gunicorn django_project.wsgi:application --workers `nproc` --worker-class gevent
+static:
+	uv run manage.py collectstatic --noinput
 opt:
 	mkdir -p .opt
 	if [ ! -f "./.opt/tailwindcss" ]; then \
