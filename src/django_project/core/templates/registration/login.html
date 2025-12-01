@@ -3,13 +3,21 @@
 
 {% block body %}
 
-<h2>Login</h2>
+<div class="flex items-center justify-center">
 <form method="POST" id="login-form" hx-boost="false">
     {% csrf_token %}
-    username<br>
-    <input name="username" type="text" class="input"><br>
-    password<br>
-    <input name="password" type="password" class="input"><br>
-    <button class="btn btn-neutral" type="submit">Login</a>
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+  <legend class="fieldset-legend">Login</legend>
+
+  <label class="label">Username</label>
+  <input type="text" class="input" placeholder="Username" name="username" />
+
+  <label class="label">Password</label>
+  <input type="password" class="input" placeholder="Password" name="password" />
+
+  <button class="btn btn-neutral mt-4" type="submit">Login</button>
+</fieldset>
 </form>
+</div>
+
 {% endblock body %}
