@@ -1,5 +1,5 @@
 node-deps:
-	npm i
+	bun i
 
 deps: node-deps
 	uv sync
@@ -11,7 +11,7 @@ prod: static
 	uv run gunicorn django_project.wsgi:application --workers `nproc` --worker-class gevent
 format: node-deps
 	uv run ruff check --select I --fix; uv run ruff format
-	npx prettier --write **/*.html
+	bunx prettier --write **/*.html
 
 static: tailwind-no-watch
 	uv run manage.py collectstatic --noinput
