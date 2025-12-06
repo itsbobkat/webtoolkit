@@ -33,7 +33,7 @@ def get_all_request_counts() -> dict[str, int]:
 def most_viewed_instances(
     qs: Iterator[ReversableModelMixin],
     limit: int = 10,
-) -> Sequence[ReversableModelMixin]:
+) -> Sequence[dict[str, ReversableModelMixin | int]]:
     request_counts = get_all_request_counts()
     model_counts = []
     for instance in qs:
